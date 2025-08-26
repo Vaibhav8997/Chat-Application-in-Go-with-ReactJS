@@ -2,68 +2,41 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
-	"github.com/gorilla/websocket"
+	"github.com/Vaibhav8997/Chat-Application-in-Go-with-ReactJS/backend/pkg/websocket"
 )
 
-// define an upgrader for Read and Write buffer size
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 2024,
-
-	//we'll need to check origin of our server
-	//this will allow us to make request from react development servr to here
-
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-// define a reader which will listen fornew msgs being sent to our websocket endpoint
-func reader(conn *websocket.Conn) {
-	for {
-		//read in message
-		messageType, p, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		//print that msg
-		fmt.Println(string(p))
-
-		if err := conn.WriteMessage(messageType, p); err != nil {
-			log.Println(err)
-			return
-		}
-	}
-}
-
 // define our websocket endpoint
-func serveWS(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Host)
+func serveWs(pool *websocket.Pool, w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Websocket Endpoint Hit")
 
-	//upgrade this connection to websocket connection
-	ws, err := upgrader.Upgrade(w, r, nil)
+	conn, err := websocket.Upgrade(w, r)
 	if err != nil {
-		log.Println(err)
+		fmt.Fprintf(w, "%+v\n", err)
 	}
 
-	//listen indefinitely for new messages coming through on our websocket connection
-	reader(ws)
+	client := &websocket.Client{
+		Conn: conn,
+		Pool: pool,
+	}
+
+	pool.Register <- client
+	client.Read()
+
 }
 
 func setupRoutes() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Simple Server")
-	})
+	pool := websocket.NewPool()
+	go pool.Start()
 
-	//map our '/ws' endpoint to 'serverWS' function
-	http.HandleFunc("/ws", serveWS)
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		serveWs(pool, w, r)
+	})
 }
 
 func main() {
+	fmt.Println("Hi there, this is my new application..")
 	setupRoutes()
 	http.ListenAndServe(":8080", nil)
 }
