@@ -46,18 +46,21 @@ cd Chat-Application-in-Go-with-ReactJS
 ## Backend Setup
 
 Navigate to the backend directory, initialize the Go module, and download dependencies:
+```
 cd Backend
 go mod init
 go mod tidy
+```
 
 ---
 
 ### Frontend Setup
 
 Navigate to the frontend directory and install dependencies:
-
+```
 cd ../frontend
 npm install
+```
 
 ---
 
@@ -66,20 +69,25 @@ npm install
 Start the backend and frontend in separate terminals.
 
 ▶️ Start Backend
+```
 cd Backend
 go run main.go
+```
 
 ▶️ Start Frontend
+```
 cd frontend
 npm start
+```
 
-The application will now be running 🎉
-:> Access the frontend at: http://localhost:3000
+The application will now be running :>
+Access the frontend at: http://localhost:3000
 
 ---
 
-📂 Project Structure
+## 📂 Project Structure
+
 Chat-Application-in-Go-with-ReactJS/
-│── Backend/          # Go server (WebSocket handling, broadcasting)
-│── frontend/         # ReactJS frontend
-│── README.md         # Project documentation
+│── Backend/ # Go server (WebSocket handling, broadcasting)
+│── frontend/ # ReactJS frontend
+│── README.md # Project documentation
