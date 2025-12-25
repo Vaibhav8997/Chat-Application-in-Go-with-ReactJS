@@ -1,0 +1,22 @@
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+COPY frontend/package*.json ./
+
+RUN npm install 
+
+COPY frontend/ .
+
+##this will create build folder
+RUN npm run build
+
+##NGINx is lightweight image of webserver
+FROM nginx:alpine
+
+##Copy from build folder to default folder of nginx
+COPY --from=builder /app/build /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD [ "nginx", "-g", "daemon off;" ]

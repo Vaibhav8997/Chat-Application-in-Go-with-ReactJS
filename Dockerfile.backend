@@ -1,0 +1,28 @@
+FROM golang:1.24-alpine AS builder
+
+## work directoory
+WORKDIR /app
+
+##copy mod and sum file for dependencies
+COPY Backend/go.mod Backend/go.sum ./ 
+
+##Download dependencied
+RUN go mod download
+
+##Copy entire backend code
+COPY Backend/ .
+
+# build the binary with name chat-server
+RUN go build -o chat-server main.go
+
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /app/chat-server .
+
+##Port expose
+EXPOSE 8080
+
+CMD [ "./chat-server" ]
+
